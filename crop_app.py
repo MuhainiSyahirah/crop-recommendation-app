@@ -3,7 +3,9 @@ import numpy as np
 import pickle
 import os
 
-# ✅ SAFELY load the trained model
+st.title("🌱 Crop Recommendation System")
+
+# SAFELY load the trained model
 model_path = 'crop_model.pkl'
 
 if not os.path.exists(model_path):
@@ -11,8 +13,6 @@ if not os.path.exists(model_path):
 else:
     with open(model_path, 'rb') as file:
         model = pickle.load(file)
-
-    st.title("🌱 Crop Recommendation System")
 
     st.markdown("Enter your soil and climate parameters below:")
 
@@ -30,5 +30,3 @@ else:
         input_data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
         prediction = model.predict(input_data)
         st.success(f"✅ Recommended Crop: **{prediction[0]}**")
-
-
