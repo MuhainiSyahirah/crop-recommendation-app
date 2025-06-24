@@ -1,26 +1,34 @@
-# train_model.py
-
-import pandas as pd
+import streamlit as st
+import numpy as np
 import pickle
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+import os
 
-# Step 1: Load the dataset
-df = pd.read_csv("Crop_recommendation.csv")  # Make sure this CSV is in the same folder
+st.title("🌱 Crop Recommendation System")
 
-# Step 2: Split into features and target
-X = df.drop("label", axis=1)
-y = df["label"]
+# SAFELY load the trained model
+model_path = 'crop_model.pkl'
 
-# Step 3: Train/test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+try:
+    with open(model_path, 'rb') as file:
+        model = pickle.load(file)
 
-# Step 4: Train the model
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
+    st.markdown("Enter your soil and climate parameters below:")
 
-# Step 5: Save the model
-with open("crop_model.pkl", "wb") as file:
-    pickle.dump(model, file, protocol=4)
+    # Input fields
+    N = st.number_input("Nitrogen (N)", 0, 200, 90)
+    P = st.number_input("Phosphorus (P)", 0, 200, 40)
+    K = st.number_input("Potassium (K)", 0, 200, 40)
+    temperature = st.slider("Temperature (°C)", 0.0, 50.0, 25.0)
+    humidity = st.slider("Humidity (%)", 0.0, 100.0, 80.0)
+    ph = st.slider("Soil pH", 3.0, 10.0, 6.5)
+    rainfall = st.slider("Rainfall (mm)", 0.0, 300.0, 200.0)
 
-print("✅ Model trained and saved as crop_model.pkl")
+    # Predict when button clicked
+    if st.button("Recommend Crop"):
+        input_data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+        prediction = model.predict(input_data)
+        st.success(f"✅ Recommended Crop: **{prediction[0]}**")
+
+except Exception as e:
+    st.error("❌ Could not load the model.")
+    st.text(f"Technical details: {e}")
